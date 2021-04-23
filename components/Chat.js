@@ -4,19 +4,28 @@ import { View, Text, StyleSheet } from 'react-native';
 
 export default class Chat extends React.Component {
   render() {
+    // import name from Start
+    let name = this.props.route.params.name;
+    // import background color from Start
+    let bgColor = this.props.route.params.bgColor;
+    // export name and color to App
+    this.props.navigation.setOptions({ title: name, backgroundColor: bgColor });
+
     return (
-      <View style={styles.container}>
-        <Text>Chat Screen</Text>
+      <View
+        style={[styles.container, { backgroundColor: bgColor }]}
+      >
+        <Text>Hello {name}! Are you ready to chat?</Text>
       </View>
     )
   }
 }
 
-// stylesheet
+//---------- Styles ----------//
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   }
 });

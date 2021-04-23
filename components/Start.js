@@ -12,7 +12,7 @@ export default class Start extends React.Component {
 
   render() {
     // import image for Start background
-    const image = require("../assets/startBackgroundimage.png");
+    const image = require("../assets/startBackground.png");
 
     return (
       <ImageBackground source={image} style={styles.backgroundImage} >
@@ -66,7 +66,7 @@ export default class Start extends React.Component {
 
             {/* navigate to chat screen */}
             <Button
-              color='#757083'
+              style={styles.chatButton}
               title="Start Chatting"
               onPress={() => this.props.navigation.navigate('Chat',
                 {
@@ -200,7 +200,8 @@ const styles = StyleSheet.create({
   chatButton: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'red'
+    backgroundColor: '#757083',
+    color: 'white',
   },
 
 });
