@@ -24,10 +24,13 @@ export default class App extends React.Component {
           <Stack.Screen
             name="Chat"
             component={Chat}
+            // import username from start
+            options={({ route }) => ({ title: route.params.name })}
           />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>
+
     );
   }
 }

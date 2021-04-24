@@ -8,14 +8,14 @@ export default class Chat extends React.Component {
     let name = this.props.route.params.name;
     // import background color from Start
     let bgColor = this.props.route.params.bgColor;
-    // export name and color to App
-    this.props.navigation.setOptions({ title: name, backgroundColor: bgColor });
 
     return (
       <View
         style={[styles.container, { backgroundColor: bgColor }]}
       >
-        <Text>Hello {name}! Are you ready to chat?</Text>
+        <Text style={styles.chatGreeting}>
+          Hello {name}! Are you ready to chat?
+        </Text>
       </View>
     )
   }
@@ -27,5 +27,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+
+  chatGreeting: {
+    color: 'white',
+  },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, Button, ImageBackground } from 'react-native';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default class Start extends React.Component {
   constructor(props) {
@@ -7,6 +8,7 @@ export default class Start extends React.Component {
     this.state = {
       name: '',
       bgColor: '',
+      btnPressed: false,
     };
   }
 
@@ -42,39 +44,42 @@ export default class Start extends React.Component {
               {/* background color options */}
               <View style={styles.colorOptions} >
 
-                <View
-                  onPress={() => this.setState({ bgColor: '#090C08' })}
+                <TouchableOpacity
+                  onPress={() => this.setState({ bgColor: '#090C08', btnPressed: true })}
                   style={styles.colorOne}
-                ></View>
+                ></TouchableOpacity>
 
-                <View
+                <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#474056' })}
                   style={styles.colorTwo}
-                ></View>
+                ></TouchableOpacity>
 
-                <View
+                <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#8A95A5' })}
                   style={styles.colorThree}
-                ></View>
+                ></TouchableOpacity>
 
-                <View
+                <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#B9C6AE' })}
                   style={styles.colorFour}
-                ></View>
+                ></TouchableOpacity>
               </View>
             </View>
 
             {/* navigate to chat screen */}
-            <Button
-              style={styles.chatButton}
-              title="Start Chatting"
-              onPress={() => this.props.navigation.navigate('Chat',
-                {
-                  name: this.state.name,
-                  bgColor: this.state.bgColor
-                }
-              )}
-            />
+            <View style={styles.chatButton}>
+              <Button
+                style={styles.chatButtonText}
+                title="Start Chatting"
+                color='white'
+                onPress={() => this.props.navigation.navigate('Chat',
+                  {
+                    name: this.state.name,
+                    bgColor: this.state.bgColor
+                  }
+                )}
+              />
+            </View>
           </View>
 
         </View>
@@ -198,9 +203,12 @@ const styles = StyleSheet.create({
   },
 
   chatButton: {
+    backgroundColor: '#757083',
+  },
+
+  chatButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    backgroundColor: '#757083',
     color: 'white',
   },
 
