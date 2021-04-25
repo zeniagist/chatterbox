@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, Button, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ImageBackground, Platform, KeyboardAvoidingView } from 'react-native';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default class Start extends React.Component {
@@ -33,6 +33,7 @@ export default class Start extends React.Component {
               value={this.state.name}
               placeholder='Type username here'
             />
+            {Platform.OS === 'ios' ? <KeyboardAvoidingView behavior="height" /> : null}
             <Text style={styles.usernameText}>{this.state.name} </Text>
 
             {/* choose background color */}
@@ -67,19 +68,18 @@ export default class Start extends React.Component {
             </View>
 
             {/* navigate to chat screen */}
-            <View style={styles.chatButton}>
-              <Button
-                style={styles.chatButtonText}
-                title="Start Chatting"
-                color='white'
-                onPress={() => this.props.navigation.navigate('Chat',
-                  {
-                    name: this.state.name,
-                    bgColor: this.state.bgColor
-                  }
-                )}
-              />
-            </View>
+            <Button
+              title="Start Chatting"
+              color='#757083'
+              fontWeight='600'
+              fontSize='16'
+              onPress={() => this.props.navigation.navigate('Chat',
+                {
+                  name: this.state.name,
+                  bgColor: this.state.bgColor
+                }
+              )}
+            />
           </View>
 
         </View>
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
   },
 
   userContainer: {
-    width: "88%",
-    height: '44%',
+    top: -30,
+    height: 'auto',
     backgroundColor: "white",
     padding: 'auto',
     borderRadius: 5,
@@ -169,7 +169,6 @@ const styles = StyleSheet.create({
   colorOne: {
     backgroundColor: '#090C08',
     width: 50,
-    width: 50,
     height: 50,
     borderRadius: 25,
     margin: 10
@@ -178,7 +177,6 @@ const styles = StyleSheet.create({
   colorTwo: {
     backgroundColor: '#474056',
     width: 50,
-    width: 50,
     height: 50,
     borderRadius: 25,
     margin: 10
@@ -186,7 +184,6 @@ const styles = StyleSheet.create({
 
   colorThree: {
     backgroundColor: '#8A95A5',
-    width: 50,
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -200,16 +197,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     margin: 10
-  },
-
-  chatButton: {
-    backgroundColor: '#757083',
-  },
-
-  chatButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
   },
 
 });
