@@ -28,6 +28,11 @@ export default class Chat extends React.Component {
             avatar: 'https://placeimg.com/140/140/any',
           },
         },
+        {
+          _id: 2,
+          createdAt: new Date(),
+          system: true,
+        },
       ],
     })
   }
@@ -39,7 +44,7 @@ export default class Chat extends React.Component {
     }))
   }
 
-  // change style of day 
+  // change style of date
   renderDay(props) {
     return <Day {...props} textStyle={{ color: 'white' }} />
   }
