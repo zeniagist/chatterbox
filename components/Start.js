@@ -8,7 +8,6 @@ export default class Start extends React.Component {
     this.state = {
       name: '',
       bgColor: '',
-      btnPressed: false,
     };
   }
 
@@ -31,10 +30,13 @@ export default class Start extends React.Component {
               style={styles.textInput}
               onChangeText={(name) => this.setState({ name })}
               value={this.state.name}
-              placeholder='Type username here'
+              placeholder='Type name here'
+              accessible={true}
+              accessibilityLabel="Enter name"
+              accessibilityHint="Enter your name for the chat"
+              accessibilityRole="keyboardkey"
             />
-            {Platform.OS === 'ios' ? <KeyboardAvoidingView behavior="height" /> : null}
-            <Text style={styles.usernameText}>{this.state.name} </Text>
+            {/* <Text style={styles.usernameText}>{this.state.name} </Text> */}
 
             {/* choose background color */}
             <View style={styles.colorContainer} >
@@ -46,40 +48,59 @@ export default class Start extends React.Component {
               <View style={styles.colorOptions} >
 
                 <TouchableOpacity
-                  onPress={() => this.setState({ bgColor: '#090C08', btnPressed: true })}
+                  onPress={() => this.setState({ bgColor: '#090C08' })}
                   style={styles.colorOne}
+                  accessible={true}
+                  accessibilityLabel="Black background"
+                  accessibilityHint="Choose background color for the chate"
+                  accessibilityRole="button"
                 ></TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#474056' })}
                   style={styles.colorTwo}
+                  accessible={true}
+                  accessibilityLabel="Dark purple background"
+                  accessibilityHint="Choose background color for the chate"
+                  accessibilityRole="button"
                 ></TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#8A95A5' })}
                   style={styles.colorThree}
+                  accessible={true}
+                  accessibilityLabel="Light purple background"
+                  accessibilityHint="Choose background color for the chate"
+                  accessibilityRole="button"
                 ></TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => this.setState({ bgColor: '#B9C6AE' })}
                   style={styles.colorFour}
+                  accessible={true}
+                  accessibilityLabel="Light green background"
+                  accessibilityHint="Choose background color for the chate"
+                  accessibilityRole="button"
                 ></TouchableOpacity>
               </View>
             </View>
 
             {/* navigate to chat screen */}
-            <Button
-              title="Start Chatting"
-              color='#757083'
-              fontWeight='600'
-              fontSize='16'
+            <TouchableOpacity
+              style={styles.chatButton}
               onPress={() => this.props.navigation.navigate('Chat',
                 {
                   name: this.state.name,
                   bgColor: this.state.bgColor
                 }
               )}
-            />
+              accessible={true}
+              accessibilityLabel="Chat button"
+              accessibilityHint="Start chatting"
+              accessibilityRole="button"
+            >
+              <Text style={styles.chatButtonText}>Start Chatting</Text>
+            </TouchableOpacity>
           </View>
 
         </View>
@@ -197,6 +218,25 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     margin: 10
+  },
+
+  chatButton: {
+    width: "88%",
+    backgroundColor: "#757083",
+    margin: 20,
+    marginLeft: "auto",
+    marginRight: "auto",
+    fontSize: 16,
+    fontWeight: "600",
+    padding: 15,
+    borderRadius: 3,
+  },
+
+  chatButtonText: {
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
   },
 
 });
