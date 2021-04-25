@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 // gifted chat for chat bubble
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, Day } from 'react-native-gifted-chat';
 
 
 export default class Chat extends React.Component {
@@ -14,23 +14,19 @@ export default class Chat extends React.Component {
 
   // send system message
   componentDidMount() {
+    // import name from Start
+    let name = this.props.route.params.name;
     this.setState({
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: `Hello ${name}! Welcome to Chatterbox. I am the Chatterbox Bot.`,
           createdAt: new Date(),
           user: {
             _id: 2,
             name: 'React Native',
             avatar: 'https://placeimg.com/140/140/any',
           },
-        },
-        {
-          _id: 2,
-          text: 'This is a system message',
-          createdAt: new Date(),
-          system: true,
         },
       ],
     })
@@ -42,6 +38,23 @@ export default class Chat extends React.Component {
       messages: GiftedChat.append(previousState.messages, messages),
     }))
   }
+
+  // change style of day 
+  renderDay(props) {
+    return <Day {...props} textStyle={{ color: 'white' }} />
+  }
+
+  // change style of system message
+  renderSystemMessage(props) {
+    let name = this.props.route.params.name;
+    return (
+      <View>
+        <Text style={{ color: 'white', textAlign: 'center' }}>
+          {name} has entered the chat.
+        </Text>
+      </View>
+    );
+  };
 
   // change style of chat bubbles
   renderBubble(props) {
@@ -58,8 +71,7 @@ export default class Chat extends React.Component {
   }
 
   render() {
-    // import name from Start
-    let name = this.props.route.params.name;
+
     // import background color from Start
     let bgColor = this.props.route.params.bgColor;
 
@@ -68,6 +80,8 @@ export default class Chat extends React.Component {
         style={[styles.container, { backgroundColor: bgColor }]}
       >
         <GiftedChat
+          renderSystemMessage={this.renderSystemMessage.bind(this)}
+          renderDay={this.renderDay}
           renderBubble={this.renderBubble.bind(this)}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
