@@ -16,11 +16,12 @@ export default class Chat extends React.Component {
   componentDidMount() {
     // import name from Start
     let name = this.props.route.params.name;
+
     this.setState({
       messages: [
         {
           _id: 1,
-          text: `Hello ${name}, I'm ChatterBot welcome to Chatterbox!`,
+          text: `Hello ${name}, I'm ChatterBot. How may I assist you?`,
           createdAt: new Date(),
           user: {
             _id: 2,
