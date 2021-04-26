@@ -20,7 +20,7 @@ export default class Chat extends React.Component {
       messages: [
         {
           _id: 1,
-          text: `Hello ${name}, welcome to Chatterbox! I am ChatterBot.`,
+          text: `Hello ${name}, I'm ChatterBot welcome to Chatterbox!`,
           createdAt: new Date(),
           user: {
             _id: 2,
