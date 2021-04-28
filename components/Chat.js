@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
-// gifted chat for chat bubble
+// Gifted Chat
 import { GiftedChat, Bubble, Day } from 'react-native-gifted-chat';
+// Firebase
+const firebase = require('firebase');
+require('firebase/firestore');
+require('firebase/auth');
 
 
 export default class Chat extends React.Component {
@@ -9,40 +13,129 @@ export default class Chat extends React.Component {
     super();
     this.state = {
       messages: [],
+      user: {
+        _id: "",
+        name: "React Native",
+        avatar: "https://placeimg.com/140/140/any",
+      },
     }
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyAyvkyUn9RB5kwAgGPJriNQF6lqPoPwDSY",
+        authDomain: "chatterbox-app-76b76.firebaseapp.com",
+        projectId: "chatterbox-app-76b76",
+        storageBucket: "chatterbox-app-76b76.appspot.com",
+        messagingSenderId: "88672132473",
+        appId: "1:88672132473:web:4846085181594e786a23a8",
+        measurementId: "G-HBW7WQBLNC"
+      });
+    }
+
+    this.referenceChatMessages = firebase.firestore().collection("messages");
+
   }
 
-  // send system message
+  // componentDidMount() {
+  //   // import name from Start
+  //   let name = this.props.route.params.name;
+  //   // welcome message
+  //   this.setState({
+  //     messages: [
+  //       {
+  //         _id: 1,
+  //         text: `Hello ${name}, I'm ChatterBot. How may I assist you?`,
+  //         createdAt: new Date(),
+  //         user: {
+  //           _id: 2,
+  //           name: 'React Native',
+  //           avatar: 'https://placeimg.com/140/140/any',
+  //         },
+  //       },
+  //       {
+  //         _id: 2,
+  //         createdAt: new Date(),
+  //         system: true,
+  //       },
+  //     ],
+  //   })
+  // }
+
   componentDidMount() {
     // import name from Start
     let name = this.props.route.params.name;
 
-    this.setState({
-      messages: [
-        {
+    // Reference to load messages via Firebase
+    this.referenceChatMessages = firebase.firestore().collection("messages");
+
+    // Authenticates user via Firebase
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+
+      this.setState({
+        user: {
           _id: 1,
-          text: `Hello ${name}, I'm ChatterBot. How may I assist you?`,
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
+          name: "React Native",
+          avatar: "https://placeimg.com/140/140/any",
         },
-        {
-          _id: 2,
-          createdAt: new Date(),
-          system: true,
-        },
-      ],
-    })
+        messages: [],
+      });
+
+      this.unsubscribe = this.referenceChatMessages
+        .orderBy("createdAt", "desc")
+        .onSnapshot(this.onCollectionUpdate);
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+    this.authUnsubscribe();
+  }
+
+  // collects data in database in real-time
+  onCollectionUpdate = (querySnapshot) => {
+    const messages = [];
+    // go through each document
+    querySnapshot.forEach((doc) => {
+      // get the QueryDocumentSnapshot's data
+      var data = doc.data();
+      messages.push({
+        _id: data._id,
+        text: data.text,
+        createdAt: data.createdAt.toDate(),
+        user: data.user,
+      });
+    });
+    this.setState({
+      messages,
+    });
+  };
+
+  // Adds messages to cloud storage
+  addMessage() {
+    const message = this.state.messages[0];
+    this.referenceChatMessages.add({
+      _id: message._id,
+      text: message.text,
+      createdAt: message.createdAt,
+      user: message.user,
+      image: message.image || null,
+      location: message.location || null,
+    });
   }
 
   // event handler for sending messages
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }))
+    }),
+      // save previous chat log
+      () => {
+        this.addMessage();
+      }
+    );
   }
 
   // change style of date
@@ -60,7 +153,7 @@ export default class Chat extends React.Component {
         </Text>
       </View>
     );
-  };
+  }
 
   // change style of chat bubbles
   renderBubble(props) {
