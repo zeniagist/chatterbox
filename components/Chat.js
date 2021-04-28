@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
+// asyncStorage
+import AsyncStorage from '@react-native-community/async-storage';
 // Gifted Chat
 import { GiftedChat, Bubble, Day } from 'react-native-gifted-chat';
 // Firebase
