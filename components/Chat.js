@@ -5,10 +5,14 @@ import AsyncStorage from '@react-native-community/async-storage';
 // Gifted Chat
 import { GiftedChat, Bubble, Day } from 'react-native-gifted-chat';
 // Firebase
-const firebase = require('firebase');
 require('firebase/firestore');
 require('firebase/auth');
 
+// web browser testing
+import firebase from 'firebase';
+
+// mobile app emulator testing
+// const firebase = require('firebase');
 
 export default class Chat extends React.Component {
   constructor() {
@@ -36,39 +40,6 @@ export default class Chat extends React.Component {
 
     this.referenceChatMessages = firebase.firestore().collection("messages");
 
-  }
-
-  componentDidMount() {
-    // import name from Start
-    let name = this.props.route.params.name;
-
-    // Reference to load messages via Firebase
-    this.referenceChatMessages = firebase.firestore().collection("messages");
-
-    // Authenticates user via Firebase
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        await firebase.auth().signInAnonymously();
-      }
-
-      this.setState({
-        user: {
-          _id: 1,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-        messages: [],
-      });
-
-      this.unsubscribe = this.referenceChatMessages
-        .orderBy("createdAt", "desc")
-        .onSnapshot(this.onCollectionUpdate);
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
-    this.authUnsubscribe();
   }
 
   // collects data in database in real-time
@@ -111,8 +82,75 @@ export default class Chat extends React.Component {
       // save previous chat log
       () => {
         this.addMessage();
+        this.saveMessages();
       }
     );
+  }
+
+  // store messages
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  // save messages
+  async saveMessages() {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  // delete messages
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  componentDidMount() {
+    // Reference to load messages via Firebase
+    this.referenceChatMessages = firebase.firestore().collection("messages");
+
+    // Authenticates user via Firebase
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+
+      // update user state with currently active user data
+      this.setState({
+        user: {
+          _id: 1,
+          name: "React Native",
+          avatar: "https://placeimg.com/140/140/any",
+        },
+        messages: [],
+      });
+
+      this.unsubscribe = this.referenceChatMessages
+        .orderBy("createdAt", "desc")
+        .onSnapshot(this.onCollectionUpdate);
+    });
+    this.getMessages();
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+    this.authUnsubscribe();
   }
 
   // change style of date
