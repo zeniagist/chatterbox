@@ -36,31 +36,6 @@ export default class Chat extends React.Component {
 
   }
 
-  // componentDidMount() {
-  //   // import name from Start
-  //   let name = this.props.route.params.name;
-  //   // welcome message
-  //   this.setState({
-  //     messages: [
-  //       {
-  //         _id: 1,
-  //         text: `Hello ${name}, I'm ChatterBot. How may I assist you?`,
-  //         createdAt: new Date(),
-  //         user: {
-  //           _id: 2,
-  //           name: 'React Native',
-  //           avatar: 'https://placeimg.com/140/140/any',
-  //         },
-  //       },
-  //       {
-  //         _id: 2,
-  //         createdAt: new Date(),
-  //         system: true,
-  //       },
-  //     ],
-  //   })
-  // }
-
   componentDidMount() {
     // import name from Start
     let name = this.props.route.params.name;
