@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 // asyncStorage
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // NetInfo
 import NetInfo from '@react-native-community/netinfo';
 // Gifted Chat
@@ -75,8 +75,6 @@ export default class Chat extends React.Component {
       text: message.text,
       createdAt: message.createdAt,
       user: message.user,
-      image: message.image || null,
-      location: message.location || null,
     });
   }
 
@@ -205,8 +203,8 @@ export default class Chat extends React.Component {
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
     this.authUnsubscribe();
+    this.unsubscribeChatUser();
   }
 
   render() {
