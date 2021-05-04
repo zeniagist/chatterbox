@@ -36,7 +36,6 @@ export default class Start extends React.Component {
               accessibilityHint="Enter your name for the chat"
               accessibilityRole="keyboardkey"
             />
-            {/* <Text style={styles.usernameText}>{this.state.name} </Text> */}
 
             {/* choose background color */}
             <View style={styles.colorContainer} >
@@ -162,12 +161,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     padding: 5,
     margin: 20,
-  },
-
-  usernameText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 20,
   },
 
   colorContainer: {
