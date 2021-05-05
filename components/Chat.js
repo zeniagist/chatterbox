@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
+import CustomActions from './CustomActions';
 // asyncStorage
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NetInfo
@@ -168,6 +169,11 @@ export default class Chat extends React.Component {
     }
   }
 
+  // adds button to access photo, camera, and location services
+  renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+
   componentDidMount() {
     NetInfo.fetch().then(connection => {
       // online
@@ -222,6 +228,7 @@ export default class Chat extends React.Component {
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
           messages={this.state.messages}
+          renderActions={this.renderCustomActions}
           onSend={messages => this.onSend(messages)}
           user={{
             _id: 1,
