@@ -1,8 +1,56 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Permissions from 'expo-permissions';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { MEDIA_LIBRARY } from 'expo-permissions';
 
 export default class CustomActions extends React.Component {
+
+  imagePicker = async () => {
+    // expo permission
+    const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
+
+    if (status === 'granted') {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'Images',
+      }).catch(error => console.log(error));
+
+      if (!result.cancelled) {
+        const imageUrl = await this.uploadImageFetch(result.uri);
+        this.props.onSend({ image: imageUrl });
+      }
+    }
+  };
+
+  uploadImageFetch = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log("XHRonError", e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+    try {
+      const imageNameBefore = uri.split("/");
+      const imageName = imageNameBefore[imageNameBefore.length - 1];
+      const ref = firebase.storage().ref().child(`images/${imageName}`);
+      const snapshot = await ref.put(blob);
+      blob.close();
+      const imageDownload = await snapshot.ref.getDownloadURL();
+      return imageDownload;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
 
   // action button options
   onActionPress = () => {
@@ -17,7 +65,7 @@ export default class CustomActions extends React.Component {
         switch (buttonIndex) {
           case 0:
             console.log('user wants to pick an image');
-            return;
+            return this.imagePicker();
           case 1:
             console.log('user wants to take a photo');
             return;
