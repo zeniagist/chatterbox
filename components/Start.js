@@ -1,15 +1,5 @@
 import React from "react";
-import {
-  View,
-  ImageBackground,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, ImageBackground, Text, TouchableOpacity, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Icon } from "react-native-elements";
 
 export default class Start extends React.Component {
@@ -22,7 +12,7 @@ export default class Start extends React.Component {
   }
 
   render() {
-    // backgourn color button options
+    // background color button options
     const bgProps = (bgColor) => {
       return (
         <TouchableOpacity
@@ -158,14 +148,10 @@ const styles = StyleSheet.create({
   appTitleContainer: {
     flex: 0.33,
     alignItems: "center",
-    // alignContent: "center", //how does this not work for the content that is within the box???
-    // justifyContent: "center",//how does this not work for the content that is within the box???
   },
 
   appTitle: {
     flex: 1,
-    // textAlign: "center",//This works like align self and justify self, WTF???
-    // textAlignVertical: "center",//This works like align self and justify self, WTF???
     fontSize: 45,
     fontWeight: "600",
     color: "#ffffff",

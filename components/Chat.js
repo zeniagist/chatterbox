@@ -100,6 +100,7 @@ export default class Chat extends React.Component {
       console.log(error.message);
     }
   }
+
   // delete messages
   async deleteMessages() {
     try {
@@ -208,7 +209,7 @@ export default class Chat extends React.Component {
       }
     });
 
-    let { name } = this.props.route.params; // use destructuring
+    let { name } = this.props.route.params;
     this.props.navigation.setOptions({ title: name });
   }
 
@@ -218,7 +219,7 @@ export default class Chat extends React.Component {
   }
 
   render() {
-    let { bgcolor } = this.props.route.params; //destructure props and use as variables
+    let { bgcolor } = this.props.route.params;
     const { user } = this.state;
     return (
       <View style={{ flex: 1, backgroundColor: bgcolor }}>

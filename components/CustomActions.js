@@ -7,56 +7,10 @@ import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
 
 import firebase from "firebase";
-import firestore from "firebase";
 
 export default class CustomActions extends Component {
-  pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status === "granted") {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "Images",
-      }).catch((error) => console.log(error));
-
-      if (!result.cancelled) {
-        const imageUrl = await this.uploadImageFetch(result.uri);
-        this.props.onSend({ image: imageUrl });
-      }
-    }
-  };
-
-  takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status === "granted") {
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: "Images",
-      }).catch((error) => console.log(error));
-      if (!result.cancelled) {
-        const imageUrl = await this.uploadImageFetch(result.uri);
-        this.props.onSend({ image: imageUrl });
-      }
-    }
-  };
-
-  getLocation = async () => {
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === "granted") {
-      const result = await Location.getCurrentPositionAsync({}).catch((error) =>
-        console.log(error)
-      );
-      const longitude = JSON.stringify(result.coords.longitude);
-      const altitude = JSON.stringify(result.coords.latitude);
-      if (result) {
-        this.props.onSend({
-          location: {
-            longitude: result.coords.longitude,
-            latitude: result.coords.latitude,
-          },
-        });
-      }
-    }
-  };
-
+  // action button options
   onActionPress = () => {
     const options = [
       "Choose From Library",
@@ -83,6 +37,37 @@ export default class CustomActions extends Component {
     );
   };
 
+  // choose photo from library
+  pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status === "granted") {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "Images",
+      }).catch((error) => console.log(error));
+
+      if (!result.cancelled) {
+        const imageUrl = await this.uploadImageFetch(result.uri);
+        this.props.onSend({ image: imageUrl });
+      }
+    }
+  };
+
+  // take photo with camera
+  takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status === "granted") {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: "Images",
+      }).catch((error) => console.log(error));
+      if (!result.cancelled) {
+        const imageUrl = await this.uploadImageFetch(result.uri);
+        this.props.onSend({ image: imageUrl });
+      }
+    }
+  };
+
+  // save image to firebase
   uploadImageFetch = async (uri) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -107,6 +92,26 @@ export default class CustomActions extends Component {
       return imageDownload;
     } catch (e) {
       console.log(e);
+    }
+  };
+
+  // get location from device
+  getLocation = async () => {
+    const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status === "granted") {
+      const result = await Location.getCurrentPositionAsync({}).catch((error) =>
+        console.log(error)
+      );
+      const longitude = JSON.stringify(result.coords.longitude);
+      const altitude = JSON.stringify(result.coords.latitude);
+      if (result) {
+        this.props.onSend({
+          location: {
+            longitude: result.coords.longitude,
+            latitude: result.coords.latitude,
+          },
+        });
+      }
     }
   };
 
