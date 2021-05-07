@@ -1,49 +1,45 @@
-import React from 'react';
-import { View, Text, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
-import CustomActions from './CustomActions';
-// asyncStorage
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// NetInfo
-import NetInfo from '@react-native-community/netinfo';
+import React from "react";
+import { View, Text, StyleSheet, Platform, KeyboardAvoidingView, Image, Alert, LogBox } from 'react-native';
+import MapView from "react-native-maps";
+import CustomActions from "./CustomActions";
 // Gifted Chat
-import { GiftedChat, Bubble, Day, InputToolbar } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar, Day } from "react-native-gifted-chat";
+// asyncStorage
+import AsyncStorage from "@react-native-community/async-storage";
+// Netinfo
+import NetInfo from "@react-native-community/netinfo";
 // Firebase
-require('firebase/firestore');
-require('firebase/auth');
-
-// web browser testing
-import firebase from 'firebase';
-
-// mobile app emulator testing
-// const firebase = require('firebase');
+const firebase = require("firebase");
+require("firebase/firestore");
 
 export default class Chat extends React.Component {
   constructor() {
     super();
     this.state = {
       messages: [],
+      image: null,
+      location: null,
+      uid: "",
       user: {
         _id: "",
-        name: "React Native",
-        avatar: "https://placeimg.com/140/140/any",
+        name: "",
       },
-      isConnected: false,
-      uid: 0,
-    }
-
+      isConnected: null,
+    };
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAyvkyUn9RB5kwAgGPJriNQF6lqPoPwDSY",
+      authDomain: "chatterbox-app-76b76.firebaseapp.com",
+      projectId: "chatterbox-app-76b76",
+      storageBucket: "chatterbox-app-76b76.appspot.com",
+      messagingSenderId: "88672132473",
+      appId: "1:88672132473:web:4846085181594e786a23a8",
+      measurementId: "G-HBW7WQBLNC"
+    };
+    // Initialize Firebase
     if (!firebase.apps.length) {
-      firebase.initializeApp({
-        apiKey: "AIzaSyAyvkyUn9RB5kwAgGPJriNQF6lqPoPwDSY",
-        authDomain: "chatterbox-app-76b76.firebaseapp.com",
-        projectId: "chatterbox-app-76b76",
-        storageBucket: "chatterbox-app-76b76.appspot.com",
-        messagingSenderId: "88672132473",
-        appId: "1:88672132473:web:4846085181594e786a23a8",
-        measurementId: "G-HBW7WQBLNC"
-      });
+      firebase.initializeApp(firebaseConfig);
     }
-
-    this.referenceChatMessages = firebase.firestore().collection("messages");
   }
 
   // collects data in database in real-time
@@ -52,15 +48,14 @@ export default class Chat extends React.Component {
     // go through each document
     querySnapshot.forEach((doc) => {
       // get the QueryDocumentSnapshot's data
-      var data = doc.data();
+      let data = doc.data();
       messages.push({
         _id: data._id,
         text: data.text,
         createdAt: data.createdAt.toDate(),
-        user: {
-          _id: data.user._id,
-          name: data.user.name,
-        },
+        user: data.user,
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     this.setState({
@@ -68,25 +63,15 @@ export default class Chat extends React.Component {
     });
   };
 
-  // Adds messages to cloud storage
-  addMessage() {
-    const message = this.state.messages[0];
-    this.referenceChatMessages.add({
-      _id: message._id,
-      text: message.text,
-      createdAt: message.createdAt,
-      user: message.user,
-    });
-  }
-
   // event handler for sending messages
   onSend(messages = []) {
-    this.setState(previousState => ({
-      messages: GiftedChat.append(previousState.messages, messages),
-    }),
-      // save previous chat log
+    messages.forEach((message) => this.referenceChatMessages.add(message));
+
+    this.setState(
+      (previousState) => ({
+        messages: GiftedChat.append(previousState.messages, messages),
+      }),
       () => {
-        this.addMessage();
         this.saveMessages();
       }
     );
@@ -94,11 +79,10 @@ export default class Chat extends React.Component {
 
   // store messages
   async getMessages() {
-    let messages = '';
     try {
-      messages = await AsyncStorage.getItem('messages') || [];
+      const messages = (await AsyncStorage.getItem("messages")) || "[]";
       this.setState({
-        messages: JSON.parse(messages)
+        messages: JSON.parse(messages),
       });
     } catch (error) {
       console.log(error.message);
@@ -108,39 +92,37 @@ export default class Chat extends React.Component {
   // save messages
   async saveMessages() {
     try {
-      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+      await AsyncStorage.setItem(
+        "messages",
+        JSON.stringify(this.state.messages)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+  // delete messages
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem("messages");
+      this.setState({
+        messages: [],
+      });
     } catch (error) {
       console.log(error.message);
     }
   }
 
-  // delete messages
-  async deleteMessages() {
-    try {
-      await AsyncStorage.removeItem('messages');
-      this.setState({
-        messages: []
-      })
-    } catch (error) {
-      console.log(error.message);
+  // hide input toolbar when offline
+  renderInputToolbar(props) {
+    if (this.state.isConnected === false) {
+    } else {
+      return <InputToolbar {...props} />;
     }
   }
 
   // change style of date
   renderDay(props) {
     return <Day {...props} textStyle={{ color: 'white' }} />
-  }
-
-  // change style of system message
-  renderSystemMessage(props) {
-    let name = this.props.route.params.name;
-    return (
-      <View>
-        <Text style={{ color: 'white', textAlign: 'center' }}>
-          {name} has entered the chat.
-        </Text>
-      </View>
-    );
   }
 
   // change style of chat bubbles
@@ -151,98 +133,112 @@ export default class Chat extends React.Component {
         wrapperStyle={{
           right: {
             backgroundColor: '#000'
-          }
+          },
         }}
       />
-    )
+    );
   }
 
-  // hide input toolbar when offline
-  renderInputToolbar(props) {
-    if (this.state.isConnected == false) {
-    } else {
-      return (
-        <InputToolbar
-          {...props}
-        />
-      );
-    }
-  }
-
-  // adds button to access photo, camera, and location services
+  // action button for choose picture, take picture, and send location
   renderCustomActions = (props) => {
     return <CustomActions {...props} />;
   };
 
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
   componentDidMount() {
-    NetInfo.fetch().then(connection => {
-      // online
+    // use netinfo to check if machine is online or offline
+    NetInfo.fetch().then((connection) => {
       if (connection.isConnected) {
-        console.log('online');
-        // Authenticates user via Firebase
-        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-          if (!user) {
-            await firebase.auth().signInAnonymously();
-          }
-          // update user state with currently active user data
-          this.setState({
-            isConnected: true,
-            user: {
-              _id: user.uid,
-              name: this.props.route.params.name,
-              avatar: 'https://placeimg.com/140/140/any'
-            },
-            messages: [],
+        // connect to messages collection
+        this.referenceChatMessages = firebase
+          .firestore()
+          .collection("messages");
+
+        // this unfortunatelly named method (authUnsubscribe) listens for changes in auth state and signs in user if no user is already signed in.
+        this.authUnsubscribe = firebase
+          .auth()
+          .onAuthStateChanged(async (user) => {
+            if (!user) {
+              await firebase.auth().signInAnonymously();
+            }
+
+            //update user state with currently active user data
+            this.setState({
+              uid: user._id,
+              user: {
+                _id: user.uid,
+                name: name,
+                avatar: "http://placeimg.com/140/140/any",
+              },
+              image: this.state.image,
+              location: {
+                latitude: 48.864601,
+                longitude: 2.398704,
+              },
+            });
+
+            this.unsubscribe = this.referenceChatMessages
+              .orderBy("createdAt", "desc")
+              .onSnapshot(this.onCollectionUpdate);
           });
-          this.referenceChatMessages = firebase.firestore().collection('messages');
-          this.unsubscribeChatUser = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
-        });
-        // offline
+        this.saveMessages();
       } else {
-        console.log('offline');
         this.setState({
-          isConnected: false
+          isConnected: false,
         });
         this.getMessages();
+        Alert.alert("You are offline, no messages can be sent!");
       }
     });
+
+    let { name } = this.props.route.params; // use destructuring
+    this.props.navigation.setOptions({ title: name });
   }
 
   componentWillUnmount() {
-    this.authUnsubscribe();
-    this.unsubscribeChatUser();
+    this.unsubscribe && this.unsubscribe();
+    this.authUnsubscribe && this.authUnsubscribe();
   }
 
   render() {
-
-    // import background color from Start
-    let bgColor = this.props.route.params.bgColor;
-
+    let { bgcolor } = this.props.route.params; //destructure props and use as variables
+    const { user } = this.state;
     return (
-      <View
-        style={[styles.container, { backgroundColor: bgColor }]}
-      >
+      <View style={{ flex: 1, backgroundColor: bgcolor }}>
+        <Text>{this.state.loggedInText}</Text>
         <GiftedChat
-          renderSystemMessage={this.renderSystemMessage.bind(this)}
           renderDay={this.renderDay}
+          renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
           messages={this.state.messages}
-          renderActions={this.renderCustomActions}
-          onSend={messages => this.onSend(messages)}
+          onSend={(messages) => this.onSend(messages)}
           user={{
             _id: 1,
           }}
         />
-        { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
+        {/* check if android and do not let keyboard cover input field */}
+        {Platform.OS === "android" ? (
+          <KeyboardAvoidingView behavior="height" />
+        ) : null}
       </View>
-    )
+    );
   }
 }
-
-//---------- Styles ----------//
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

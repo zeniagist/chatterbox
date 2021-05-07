@@ -1,27 +1,86 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import * as Permissions from 'expo-permissions';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
-import { MEDIA_LIBRARY } from 'expo-permissions';
+import React, { Component } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default class CustomActions extends React.Component {
+import PropTypes from "prop-types";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import * as Permissions from "expo-permissions";
 
-  imagePicker = async () => {
-    // expo permission
-    const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
+import firebase from "firebase";
+import firestore from "firebase";
 
-    if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'Images',
-      }).catch(error => console.log(error));
+export default class CustomActions extends Component {
+  pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status === "granted") {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "Images",
+      }).catch((error) => console.log(error));
 
       if (!result.cancelled) {
         const imageUrl = await this.uploadImageFetch(result.uri);
         this.props.onSend({ image: imageUrl });
       }
     }
+  };
+
+  takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status === "granted") {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: "Images",
+      }).catch((error) => console.log(error));
+      if (!result.cancelled) {
+        const imageUrl = await this.uploadImageFetch(result.uri);
+        this.props.onSend({ image: imageUrl });
+      }
+    }
+  };
+
+  getLocation = async () => {
+    const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status === "granted") {
+      const result = await Location.getCurrentPositionAsync({}).catch((error) =>
+        console.log(error)
+      );
+      const longitude = JSON.stringify(result.coords.longitude);
+      const altitude = JSON.stringify(result.coords.latitude);
+      if (result) {
+        this.props.onSend({
+          location: {
+            longitude: result.coords.longitude,
+            latitude: result.coords.latitude,
+          },
+        });
+      }
+    }
+  };
+
+  onActionPress = () => {
+    const options = [
+      "Choose From Library",
+      "Take Picture",
+      "Send Location",
+      "Cancel",
+    ];
+    const cancelButtonIndex = options.length - 1;
+    this.context.actionSheet().showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      async (buttonIndex) => {
+        switch (buttonIndex) {
+          case 0:
+            return this.pickImage();
+          case 1:
+            return this.takePhoto();
+          case 2:
+            return this.getLocation();
+        }
+      }
+    );
   };
 
   uploadImageFetch = async (uri) => {
@@ -51,32 +110,6 @@ export default class CustomActions extends React.Component {
     }
   };
 
-
-  // action button options
-  onActionPress = () => {
-    const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
-    const cancelButtonIndex = options.length - 1;
-    this.context.actionSheet().showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      async (buttonIndex) => {
-        switch (buttonIndex) {
-          case 0:
-            console.log('user wants to pick an image');
-            return this.imagePicker();
-          case 1:
-            console.log('user wants to take a photo');
-            return;
-          case 2:
-            console.log('user wants to get their location');
-          default:
-        }
-      },
-    );
-  };
-
   render() {
     return (
       <TouchableOpacity style={[styles.container]} onPress={this.onActionPress}>
@@ -88,7 +121,6 @@ export default class CustomActions extends React.Component {
   }
 }
 
-//---------- Styles ----------//
 const styles = StyleSheet.create({
   container: {
     width: 26,
@@ -98,16 +130,16 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     borderRadius: 13,
-    borderColor: '#b2b2b2',
+    borderColor: "#b2b2b2",
     borderWidth: 2,
     flex: 1,
   },
   iconText: {
-    color: '#b2b2b2',
-    fontWeight: 'bold',
+    color: "#b2b2b2",
+    fontWeight: "bold",
     fontSize: 16,
-    backgroundColor: 'transparent',
-    textAlign: 'center',
+    backgroundColor: "transparent",
+    textAlign: "center",
   },
 });
 

@@ -1,114 +1,144 @@
-import React from 'react';
-import { StyleSheet, View, Text, TextInput, Button, ImageBackground, Platform, KeyboardAvoidingView } from 'react-native';
-import { TouchableOpacity } from "react-native-gesture-handler";
+import React from "react";
+import {
+  View,
+  ImageBackground,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Icon } from "react-native-elements";
 
 export default class Start extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      bgColor: '#474056',
+      name: "",
+      bgcolor: "#090C08",
     };
   }
 
   render() {
+    // backgourn color button options
+    const bgProps = (bgColor) => {
+      return (
+        <TouchableOpacity
+          key={bgColor}
+          style={[
+            { backgroundColor: bgColor },
+            styles.bgColorNotSelected,
+            this.state.bgcolor === bgColor && styles.bgColorSelected,
+          ]}
+          onPress={() => this.setState({ bgcolor: bgColor })}
+        >
+          <View
+            key={bgColor}
+            style={[
+              { backgroundColor: bgColor },
+              { zIndex: 1 },
+              styles.bgColorOptions,
+              this.state.bgcolor === bgColor &&
+              styles.bgColorSelected,
+            ]}
+          ></View>
+        </TouchableOpacity>
+      );
+    };
+
     // import image for Start background
     const image = require("../assets/startBackground.png");
 
     return (
       <ImageBackground source={image} style={styles.backgroundImage} >
-        <View style={styles.container} >
+        <View style={styles.container}>
 
           {/* app title */}
           <View style={styles.appTitleContainer}>
             <Text style={styles.appTitle}>Chatterbox</Text>
           </View>
 
-          <View style={styles.userContainer} >
-            {/* username input */}
-            <TextInput
-              style={styles.textInput}
-              onChangeText={(name) => this.setState({ name })}
-              value={this.state.name}
-              placeholder='Type name here'
-              accessible={true}
-              accessibilityLabel="Enter name"
-              accessibilityHint="Enter your name for the chat"
-              accessibilityRole="keyboardkey"
-            />
-
-            {/* choose background color */}
-            <View style={styles.colorContainer} >
-
-              <Text style={styles.colorTitle} >
-                Choose Background Color:
-              </Text>
-              {/* background color options */}
-              <View style={styles.colorOptions} >
-
-                <TouchableOpacity
-                  onPress={() => this.setState({ bgColor: '#090C08' })}
-                  style={styles.colorOne}
+          <View style={styles.userBoxContainer}>
+            <View style={styles.userContainer}>
+              <View style={styles.userInputContainer} >
+                {/* username icon */}
+                <Icon
+                  style={styles.userIcon}
+                  name="user"
+                  type="antdesign"
+                  color="gray"
+                />
+                {/* username input */}
+                <TextInput
+                  style={styles.userInput}
+                  onChangeText={(name) => this.setState({ name })}
+                  value={this.state.name}
+                  placeholder='Type name here'
                   accessible={true}
-                  accessibilityLabel="Black background"
-                  accessibilityHint="Choose background color for the chate"
-                  accessibilityRole="button"
-                ></TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => this.setState({ bgColor: '#474056' })}
-                  style={styles.colorTwo}
-                  accessible={true}
-                  accessibilityLabel="Dark purple background"
-                  accessibilityHint="Choose background color for the chate"
-                  accessibilityRole="button"
-                ></TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => this.setState({ bgColor: '#8A95A5' })}
-                  style={styles.colorThree}
-                  accessible={true}
-                  accessibilityLabel="Light purple background"
-                  accessibilityHint="Choose background color for the chate"
-                  accessibilityRole="button"
-                ></TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => this.setState({ bgColor: '#B9C6AE' })}
-                  style={styles.colorFour}
-                  accessible={true}
-                  accessibilityLabel="Light green background"
-                  accessibilityHint="Choose background color for the chate"
-                  accessibilityRole="button"
-                ></TouchableOpacity>
+                  accessibilityLabel="Enter name"
+                  accessibilityHint="Enter your name for the chat"
+                  accessibilityRole="keyboardkey"
+                />
               </View>
-            </View>
 
-            {/* navigate to chat screen */}
-            <TouchableOpacity
-              style={styles.chatButton}
-              onPress={() => this.props.navigation.navigate('Chat',
-                {
-                  name: this.state.name,
-                  bgColor: this.state.bgColor
-                }
-              )}
-              accessible={true}
-              accessibilityLabel="Chat button"
-              accessibilityHint="Start chatting"
-              accessibilityRole="button"
-            >
-              <Text style={styles.chatButtonText}>Start Chatting</Text>
-            </TouchableOpacity>
+              {/* choose background color */}
+              <View style={styles.colorContainer}>
+                <Text style={styles.colorTitle} >
+                  Choose Background Color:
+                </Text>
+                {/* background color options */}
+                <TouchableOpacity
+                  style={styles.colorOptions}
+                  accessible={true}
+                  accessibilityLabel="Background color option"
+                  accessibilityHint="Choose background color for the chat"
+                  accessibilityRole="button"
+                >
+                  {["#090C08", "#474056", "#8A95A5", "#B9C6AE"].map(bgProps)}
+                </TouchableOpacity>
+              </View>
+
+              {/* navigate to chat screen */}
+              <TouchableOpacity
+                style={styles.chatButton}
+                onPress={() => {
+                  {/* name input blank */ }
+                  if (this.state.name === "") {
+                    Alert.alert("Please input a name!");
+                  } else {
+                    this.props.navigation.navigate("Chat",
+                      {
+                        name: this.state.name,
+                        bgcolor: this.state.bgcolor,
+                      }
+                    )
+                  }
+                }}
+                accessible={true}
+                accessibilityLabel="Chat button"
+                accessibilityHint="Start chatting"
+                accessibilityRole="button"
+              >
+                <Text
+                  style={styles.chatButtonText}
+                >
+                  Start Chatting
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
+          {Platform.OS === "android" ? (
+            <KeyboardAvoidingView behavior="height" />
+          ) : null}
         </View>
       </ImageBackground>
-    )
+    );
   }
 }
 
-//---------- Styles ----------//
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
@@ -126,110 +156,109 @@ const styles = StyleSheet.create({
   },
 
   appTitleContainer: {
-    width: '88%',
-    height: '56%'
+    flex: 0.33,
+    alignItems: "center",
+    // alignContent: "center", //how does this not work for the content that is within the box???
+    // justifyContent: "center",//how does this not work for the content that is within the box???
   },
 
   appTitle: {
-    position: "relative",
-    textAlign: "center",
-    margin: 20,
-    marginRight: "auto",
-    marginLeft: "auto",
-    color: "#FFFFFF",
-    top: 100,
-    height: "44%",
+    flex: 1,
+    // textAlign: "center",//This works like align self and justify self, WTF???
+    // textAlignVertical: "center",//This works like align self and justify self, WTF???
     fontSize: 45,
     fontWeight: "600",
+    color: "#ffffff",
+    marginTop: 30,
+  },
+
+  userBoxContainer: {
+    flex: 0.44,
+    backgroundColor: "#fff",
+    width: "88%",
+    alignSelf: "center",
   },
 
   userContainer: {
-    top: -30,
-    height: 'auto',
-    backgroundColor: "white",
-    padding: 'auto',
-    borderRadius: 5,
+    flex: 1,
+    width: "88%",
+    alignSelf: "center",
+    justifyContent: "space-evenly",
   },
 
-  textInput: {
-    borderColor: 'gray',
-    color: '#757083',
+  userInputContainer: {
+    flex: 0.2,
+    flexDirection: "row",
+    borderColor: "gray",
     borderWidth: 1,
-    fontSize: 16,
-    fontWeight: '300',
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+
+  userIcon: {
+    marginLeft: 15,
+    marginRight: 10,
+  },
+
+  userInput: {
+    flex: 0.95,
+    color: "#757083",
     opacity: 50,
-    position: 'relative',
-    padding: 5,
-    margin: 20,
+    fontWeight: "300",
+    fontSize: 16,
   },
 
   colorContainer: {
-    margin: 20
+    flex: 0.33,
+    justifyContent: "center",
   },
 
   colorTitle: {
+    color: "#757083",
+    opacity: 1,
+    fontWeight: "300",
     fontSize: 16,
-    fontWeight: '300',
-    color: '#757083',
-    opacity: 100
+    paddingBottom: 15,
+    textAlign: "center",
   },
 
   colorOptions: {
-    flexDirection: 'row',
-    marginRight: 5,
-    position: 'relative'
-  },
-
-  colorOne: {
-    backgroundColor: '#090C08',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 10
-  },
-
-  colorTwo: {
-    backgroundColor: '#474056',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 10
-  },
-
-  colorThree: {
-    backgroundColor: '#8A95A5',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 10
-  },
-
-  colorFour: {
-    backgroundColor: '#B9C6AE',
-    width: 50,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 10
+    flexDirection: "row",
+    justifyContent: "space-evenly",
   },
 
   chatButton: {
-    width: "88%",
+    flex: 0.2,
     backgroundColor: "#757083",
-    margin: 20,
-    marginLeft: "auto",
-    marginRight: "auto",
-    fontSize: 16,
-    fontWeight: "600",
-    padding: 15,
-    borderRadius: 3,
+    opacity: 1,
+    color: "#ffffff",
+    justifyContent: "center",
   },
 
   chatButtonText: {
-    textAlign: "center",
-    color: "#FFFFFF",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: 16,
+    color: "#ffffff",
+    alignSelf: "center",
   },
 
+  bgColorNotSelected: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    padding: 10,
+  },
+
+  bgColorSelected: {
+    borderWidth: 2,
+    borderColor: "#fff",
+    borderStyle: "solid",
+    transform: [{ scale: 1.5 }],
+  },
+
+  bgColorOptions: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 50,
+  },
 });
