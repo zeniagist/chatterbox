@@ -10,7 +10,7 @@ and camera. Location sharing is enabled by the user granting the app permission 
 
 See the **hosted project** [here](https://zeniagist.github.io). <br />
 
-![Chatterbox](assets/startBackground.png)
+![Chatterbox](assets/chatterbox.PNG)
 
 ## Quick Start 🚀
 
