@@ -7,8 +7,7 @@ Firestore Database and Google Firebase authentication and are also accessible of
 
 Users are able to share images (take a picture or choose from media library) once the user grants access to their local media library
 and camera. Location sharing is enabled by the user granting the app permission to read user location data.
-
-See the **hosted project** [here](https://zeniagist.github.io). <br />
+ <br />
 
 ![Chatterbox](assets/chatterbox.gif)
 
