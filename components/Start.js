@@ -58,7 +58,7 @@ export default class Start extends React.Component {
           style={styles.image}
         >
           <View style={styles.box1}>
-            <Text style={styles.title}>ChatAway</Text>
+            <Text style={styles.title}>Chatterbox</Text>
           </View>
           <View style={styles.box2}>
             <View
