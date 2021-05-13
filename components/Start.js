@@ -22,11 +22,8 @@ export default class Start extends React.Component {
   }
 
   render() {
-    // This factory function will build all color "buttons" and assign the correct background color to them programatically.
-    // It will also change the state for the bgcolor because we want to pass it to the Chat screen as props using the navigation
     const factoriseBgProps = (bgcolorinfunc) => {
       return (
-        // This creates the outer rings for the default background selectors
         <TouchableOpacity
           key={bgcolorinfunc}
           style={[
