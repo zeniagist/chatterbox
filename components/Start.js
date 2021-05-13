@@ -1,5 +1,15 @@
 import React from "react";
-import { View, ImageBackground, Text, TouchableOpacity, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  ImageBackground,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Icon } from "react-native-elements";
 
 export default class Start extends React.Component {
@@ -12,237 +22,191 @@ export default class Start extends React.Component {
   }
 
   render() {
-    // background color button options
-    const bgProps = (bgColor) => {
+    // This factory function will build all color "buttons" and assign the correct background color to them programatically.
+    // It will also change the state for the bgcolor because we want to pass it to the Chat screen as props using the navigation
+    const factoriseBgProps = (bgcolorinfunc) => {
       return (
+        // This creates the outer rings for the default background selectors
         <TouchableOpacity
-          key={bgColor}
+          key={bgcolorinfunc}
           style={[
-            { backgroundColor: bgColor },
-            styles.bgColorNotSelected,
-            this.state.bgcolor === bgColor && styles.bgColorSelected,
+            { backgroundColor: bgcolorinfunc },
+            styles.defaultForColorCircles,
+            this.state.bgcolor === bgcolorinfunc && styles.colorCirclesSelected,
           ]}
-          onPress={() => this.setState({ bgcolor: bgColor })}
+          onPress={() => this.setState({ bgcolor: bgcolorinfunc })}
         >
+          {/* This creates the inner circles of background selectors */}
           <View
-            key={bgColor}
+            key={bgcolorinfunc}
             style={[
-              { backgroundColor: bgColor },
+              { backgroundColor: bgcolorinfunc },
               { zIndex: 1 },
-              styles.bgColorOptions,
-              this.state.bgcolor === bgColor &&
-              styles.bgColorSelected,
+              styles.defaultForSmallerCircles,
+              this.state.bgcolor === bgcolorinfunc &&
+                styles.colorCirclesSelected,
             ]}
           ></View>
         </TouchableOpacity>
       );
     };
 
-    // import image for Start background
-    const image = require("../assets/startBackground.png");
-
     return (
-      <ImageBackground source={image} style={styles.backgroundImage} >
-        <View style={styles.container}>
-
-          {/* app title */}
-          <View style={styles.appTitleContainer}>
-            <Text style={styles.appTitle}>Chatterbox</Text>
+      <View style={styles.container}>
+        <ImageBackground
+          source={require("../assets/backgroundimage.png")}
+          style={styles.image}
+        >
+          <View style={styles.box1}>
+            <Text style={styles.title}>ChatAway</Text>
           </View>
-
-          <View style={styles.userBoxContainer}>
-            <View style={styles.userContainer}>
-              <View style={styles.userInputContainer} >
-                {/* username icon */}
+          <View style={styles.box2}>
+            <View
+              style={{
+                flex: 1,
+                width: "88%",
+                alignSelf: "center",
+                justifyContent: "space-evenly",
+              }}
+            >
+              <View
+                style={{
+                  flex: 0.2,
+                  flexDirection: "row",
+                  borderColor: "gray",
+                  borderWidth: 1,
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                }}
+              >
                 <Icon
-                  style={styles.userIcon}
                   name="user"
                   type="antdesign"
                   color="gray"
+                  style={{ marginLeft: 15, marginRight: 10 }}
                 />
-                {/* username input */}
                 <TextInput
-                  style={styles.userInput}
+                  style={{
+                    flex: 0.95,
+                    color: "#757083",
+                    opacity: 0.5,
+                    fontWeight: "300",
+                    fontSize: 16,
+                  }}
                   onChangeText={(name) => this.setState({ name })}
                   value={this.state.name}
-                  placeholder='Type name here'
-                  accessible={true}
-                  accessibilityLabel="Enter name"
-                  accessibilityHint="Enter your name for the chat"
-                  accessibilityRole="keyboardkey"
+                  placeholder="Your Name"
                 />
               </View>
-
-              {/* choose background color */}
-              <View style={styles.colorContainer}>
-                <Text style={styles.colorTitle} >
+              <View style={{ flex: 0.33, justifyContent: "center" }}>
+                <Text
+                  style={{
+                    color: "#757083",
+                    opacity: 1,
+                    fontWeight: "300",
+                    fontSize: 16,
+                    paddingBottom: 15,
+                    textAlign: "center",
+                  }}
+                >
                   Choose Background Color:
                 </Text>
-                {/* background color options */}
-                <TouchableOpacity
-                  style={styles.colorOptions}
-                  accessible={true}
-                  accessibilityLabel="Background color option"
-                  accessibilityHint="Choose background color for the chat"
-                  accessibilityRole="button"
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                  }}
                 >
-                  {["#090C08", "#474056", "#8A95A5", "#B9C6AE"].map(bgProps)}
-                </TouchableOpacity>
+                  {["#090C08", "#474056", "#8A95A5", "#B9C6AE"].map(
+                    factoriseBgProps
+                  )}
+                </View>
               </View>
-
-              {/* navigate to chat screen */}
               <TouchableOpacity
-                style={styles.chatButton}
+                style={{
+                  flex: 0.2,
+                  backgroundColor: "#757083",
+                  opacity: 1,
+                  color: "#ffffff",
+                  justifyContent: "center",
+                }}
                 onPress={() => {
-                  {/* name input blank */ }
                   if (this.state.name === "") {
                     Alert.alert("Please input a name!");
+                  } else if (this.state.bgcolor === "") {
+                    Alert.alert("Please select a color!");
                   } else {
-                    this.props.navigation.navigate("Chat",
-                      {
-                        name: this.state.name,
-                        bgcolor: this.state.bgcolor,
-                      }
-                    )
+                    this.props.navigation.navigate("Chat", {
+                      name: this.state.name,
+                      bgcolor: this.state.bgcolor,
+                    }); //pass name and background color as props to the Chat view
+                    this.setState({ name: "" }); // clear the state for name so the user has to input it.
                   }
                 }}
-                accessible={true}
-                accessibilityLabel="Chat button"
-                accessibilityHint="Start chatting"
-                accessibilityRole="button"
               >
                 <Text
-                  style={styles.chatButtonText}
+                  style={{
+                    fontWeight: "700",
+                    fontSize: 16,
+                    color: "#ffffff",
+                    alignSelf: "center",
+                  }}
                 >
                   Start Chatting
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-
-          {Platform.OS === "android" ? (
-            <KeyboardAvoidingView behavior="height" />
-          ) : null}
-        </View>
-      </ImageBackground>
+        </ImageBackground>
+        {Platform.OS === "android" ? (
+          <KeyboardAvoidingView behavior="height" />
+        ) : null}
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: "center",
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 15,
   },
-
-  appTitleContainer: {
+  image: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "space-evenly",
+  },
+  box1: {
     flex: 0.33,
     alignItems: "center",
   },
-
-  appTitle: {
-    flex: 1,
-    fontSize: 45,
-    fontWeight: "600",
-    color: "#ffffff",
-    marginTop: 30,
-  },
-
-  userBoxContainer: {
+  box2: {
     flex: 0.44,
     backgroundColor: "#fff",
     width: "88%",
     alignSelf: "center",
   },
 
-  userContainer: {
+  title: {
     flex: 1,
-    width: "88%",
-    alignSelf: "center",
-    justifyContent: "space-evenly",
-  },
-
-  userInputContainer: {
-    flex: 0.2,
-    flexDirection: "row",
-    borderColor: "gray",
-    borderWidth: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-
-  userIcon: {
-    marginLeft: 15,
-    marginRight: 10,
-  },
-
-  userInput: {
-    flex: 0.95,
-    color: "#757083",
-    opacity: 50,
-    fontWeight: "300",
-    fontSize: 16,
-  },
-
-  colorContainer: {
-    flex: 0.33,
-    justifyContent: "center",
-  },
-
-  colorTitle: {
-    color: "#757083",
-    opacity: 1,
-    fontWeight: "300",
-    fontSize: 16,
-    paddingBottom: 15,
-    textAlign: "center",
-  },
-
-  colorOptions: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-  },
-
-  chatButton: {
-    flex: 0.2,
-    backgroundColor: "#757083",
-    opacity: 1,
+    fontSize: 45,
+    fontWeight: "600",
     color: "#ffffff",
-    justifyContent: "center",
+    marginTop: 30,
   },
-
-  chatButtonText: {
-    fontWeight: "700",
-    fontSize: 16,
-    color: "#ffffff",
-    alignSelf: "center",
-  },
-
-  bgColorNotSelected: {
+  defaultForColorCircles: {
     width: 40,
     height: 40,
     borderRadius: 20,
     padding: 10,
   },
-
-  bgColorSelected: {
+  colorCirclesSelected: {
     borderWidth: 2,
     borderColor: "#fff",
     borderStyle: "solid",
     transform: [{ scale: 1.5 }],
   },
-
-  bgColorOptions: {
+  defaultForSmallerCircles: {
     width: "100%",
     height: "100%",
     borderRadius: 50,

@@ -1,199 +1,279 @@
 import React, { Component } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
-import PropTypes from 'prop-types';
-import * as Permissions from 'expo-permissions';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
-import firebase from 'firebase';
-import 'firebase/firestore';
+import {
+  Alert,
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  StyleSheet,
+  LogBox,
+} from 'react-native';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
+import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import MapView from 'react-native-maps';
+import CustomActions from './CustomActions';
+const firebase = require('firebase');
+require('firebase/firestore');
 
-class CustomActions extends Component {
-  constructor() {
-    super();
+class Chat extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      messages: [],
+      uid: 0,
+      user: {
+        _id: '',
+        name: '',
+        avatar: '',
+      },
+      isConnected: false,
+      image: null,
+      location: null,
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAyvkyUn9RB5kwAgGPJriNQF6lqPoPwDSY",
+      authDomain: "chatterbox-app-76b76.firebaseapp.com",
+      projectId: "chatterbox-app-76b76",
+      storageBucket: "chatterbox-app-76b76.appspot.com",
+      messagingSenderId: "88672132473",
+      appId: "1:88672132473:web:4846085181594e786a23a8",
+      measurementId: "G-HBW7WQBLNC",
+    };
+
+    // Connect to Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    // References Firebase messages
+    this.referenceChatMessages = firebase.firestore().collection('messages');
+    // Ignores certain warning messages in console
+    LogBox.ignoreLogs([
+      'Setting a timer',
+      'undefined',
+      'Animated.event now requires a second argument for options',
+    ]);
   }
 
-  // When user clicks action button
-  onActionPress = () => {
-    //   Options for user to choose from in ActionSheet
-    const options = [
-      'Select Image From Library',
-      'Take a Photo',
-      'Share Location',
-      'Cancel',
-    ];
+  componentDidMount() {
+    let { name } = this.props.route.params;
 
-    // Positions and displays ActionSheet
-    const cancelButtonIndex = options.length - 1;
-    this.context.actionSheet().showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      async (buttonIndex) => {
-        switch (buttonIndex) {
-          case 0:
-            return this.pickImage();
-          case 1:
-            return this.takePhoto();
-          case 2:
-            return this.getLocation();
-          default:
-        }
+    // Check user connection
+    NetInfo.fetch().then((connection) => {
+      if (connection.isConnected) {
+        this.setState({ isConnected: true });
+
+        // Reference to load messages via Firebase
+        this.referenceChatMessages = firebase
+          .firestore()
+          .collection('messages');
+
+        // Authenticates user via Firebase
+        this.authUnsubscribe = firebase
+          .auth()
+          .onAuthStateChanged(async (user) => {
+            if (!user) {
+              await firebase.auth().signInAnonymously();
+            }
+            // Add user to state
+            this.setState({
+              uid: user.uid,
+              user: {
+                _id: user.uid,
+                name: name,
+                avatar: 'https://placeimg.com/140/140/any',
+              },
+              messages: [],
+            });
+            // Listener for collection changes for current user
+            this.unsubscribeChatUser = this.referenceChatMessages
+              .orderBy('createdAt', 'desc')
+              .onSnapshot(this.onCollectionUpdate);
+          });
+      } else {
+        this.setState({ isConnected: false });
+        this.getMessages();
+        Alert.alert(
+          'No internet connection detected | Unable to send messages'
+        );
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    // Stops listening for authentication
+    this.unsubscribeChatUser();
+    // Stops listening for changes
+    this.authUnsubscribe();
+  }
+
+  // Updates messages state
+  onCollectionUpdate = (querySnapshot) => {
+    const messages = [];
+    // Iterate through each document
+    querySnapshot.forEach((doc) => {
+      let data = doc.data(); // Grabs QueryDocumentSnapshot's data
+      messages.push({
+        _id: data._id,
+        text: data.text,
+        createdAt: data.createdAt.toDate(),
+        user: {
+          _id: data.user._id,
+          name: data.user.name,
+          avatar: data.user.avatar,
+        },
+        image: data.image || '',
+        location: data.location || null,
+      });
+    });
+    this.setState({ messages });
+  };
+
+  // Retrieve messages from client-side storage
+  getMessages = async () => {
+    let messages = '';
+    try {
+      messages = (await AsyncStorage.getItem('messages')) || [];
+      this.setState({ messages: JSON.parse(messages) });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Saves messages in client-side storage
+  saveMessages = async () => {
+    try {
+      await AsyncStorage.setItem(
+        'messages',
+        JSON.stringify(this.state.messages)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Delete messages in client-side storage
+  deleteMessages = async () => {
+    try {
+      await AsyncStorage.removeItem('messages');
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Adds messages to cloud storage
+  addMessage() {
+    const message = this.state.messages[0];
+    this.referenceChatMessages.add({
+      _id: message._id,
+      uid: this.state.uid,
+      createdAt: message.createdAt,
+      text: message.text || '',
+      user: message.user,
+      image: message.image || '',
+      location: message.location || null,
+    });
+  }
+
+  // Event handler for sending messages
+  onSend(messages = []) {
+    this.setState(
+      (previousState) => ({
+        messages: GiftedChat.append(previousState.messages, messages),
+      }),
+      () => {
+        this.addMessage();
+        this.saveMessages();
       }
     );
-  };
+  }
 
-  // Allows user to pick an image from their library
-  pickImage = async () => {
-    try {
-      // Asks user's permission to access media library
-      const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
-
-      if (status === 'granted') {
-        // Launches local picture gallery to choose image from
-        let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        }).catch((error) => console.log(error));
-
-        // Uploads image to database and sends image in chat
-        if (!result.cancelled) {
-          const imageUrl = await this.uploadImage(result.uri);
-          this.props.onSend({ image: imageUrl });
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
+  // Renders message input only when app is online
+  renderInputToolbar(props) {
+    if (this.state.isConnected == false) {
+    } else {
+      return <InputToolbar {...props} />;
     }
-  };
+  }
 
-  // Allows user to take a photo from their camera
-  takePhoto = async () => {
-    try {
-      // Ask user's permission to access camera and media library
-      const { status } = await Permissions.askAsync(
-        Permissions.CAMERA,
-        Permissions.MEDIA_LIBRARY
+  // Renders sender's chat bubble with custom color
+  renderBubble(props) {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: {
+            backgroundColor: '#08d9d6',
+          },
+        }}
+      />
+    );
+  }
+
+  // Returns a MapView that shows user's location
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          showsUserLocation={true}
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 15,
+            margin: 5,
+          }}
+          region={{
+            longitude: Number(currentMessage.location.longitude),
+            latitude: Number(currentMessage.location.latitude),
+            longitudeDelta: 0.0421,
+            latitudeDelta: 0.0922,
+          }}
+        />
       );
-
-      if (status === 'granted') {
-        // Launches camera and allows user to take a picture
-        let result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        }).catch((error) => console.log(error));
-
-        // Uploads image to database and sends image in chat
-        if (!result.cancelled) {
-          const imageUrl = await this.uploadImage(result.uri);
-          this.props.onSend({ image: imageUrl });
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
     }
-  };
+    return null;
+  }
 
-  // Upload image to Firebaes in blob format
-  uploadImage = async (uri) => {
-    try {
-      // Convert image to blob format
-      const blob = await new Promise((resolve, reject) => {
-        // Creates new XMLHttp request
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function () {
-          resolve(xhr.response);
-        };
-        xhr.onerror = function (error) {
-          console.log(error);
-          reject(new TypeError('Network Request Failed'));
-        };
-        // Opens connection to receive image data and reponds as 'blob' type
-        xhr.responseType = 'blob';
-        xhr.open('GET', uri, true);
-        xhr.send(null);
-      });
-
-      // Creates unique file names for storage
-      const uriParse = uri.split('/');
-      const fileName = uriParse[uriParse.length - 1];
-
-      // References remote database storage (Firestore)
-      const ref = firebase.storage().ref().child(`${fileName}`);
-      const snapshot = await ref.put(blob);
-      blob.close(); // Close connection
-
-      // Returns image's unique URL from remote database
-      return await snapshot.ref.getDownloadURL();
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  // Gets user's location to send
-  getLocation = async () => {
-    try {
-      // Ask user permission to access location
-      const { status } = await Permissions.askAsync(Permissions.LOCATION);
-      if (status === 'granted') {
-        // Gets user's location
-        let result = await Location.getCurrentPositionAsync({});
-        const latitude = JSON.stringify(result.coords.latitude);
-        const longitude = JSON.stringify(result.coords.longitude);
-
-        if (result) {
-          // Sends user's location
-          this.props.onSend({
-            location: {
-              latitude,
-              longitude,
-            },
-          });
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
+  renderActions = (props) => {
+    return <CustomActions {...props} />;
   };
 
   render() {
+    const { name, bgcolor } = this.props.route.params;
+    const { messages } = this.state;
+
+    const styles = StyleSheet.create({
+      container: {
+        backgroundColor: bgcolor,
+        flex: 1,
+      },
+    });
+
     return (
-      <TouchableOpacity
-        style={[styles.container]}
-        accessibilityLabel='Action button'
-        accessibilityHint='Select an image to send, take a picture, or send current location'
-        onPress={this.onActionPress}
-      >
-        <View style={[styles.wrapper, this.props.wrapperStyle]}>
-          <Text style={[styles.iconText, this.props.iconTextStyle]}>+</Text>
-        </View>
-      </TouchableOpacity>
+      <View style={styles.container}>
+        <GiftedChat
+          renderBubble={this.renderBubble.bind(this)}
+          renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderUsernameOnMessage={true}
+          renderCustomView={this.renderCustomView}
+          renderActions={this.renderActions}
+          messages={messages}
+          onSend={(messages) => this.onSend(messages)}
+          user={{
+            _id: 1,
+            avatar: 'https://placeimg.com/140/140/any',
+            name: name,
+          }}
+        />
+        {/* Android keyboard fix */}
+        {Platform.OS === 'android' ? (
+          <KeyboardAvoidingView behavior='height' />
+        ) : null}
+      </View>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: 26,
-    height: 26,
-    marginLeft: 10,
-    marginBottom: 10,
-  },
-  wrapper: {
-    borderRadius: 13,
-    borderColor: '#b2b2b2',
-    borderWidth: 2,
-    flex: 1,
-  },
-  iconText: {
-    color: '#2b2b2b',
-    fontWeight: 'bold',
-    fontSize: 16,
-    backgroundColor: 'transparent',
-    textAlign: 'center',
-  },
-});
-
-export default CustomActions;
-
-CustomActions.contextTypes = {
-  actionSheet: PropTypes.func,
-};
+export default Chat;
