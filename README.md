@@ -7,9 +7,15 @@ Firestore Database and Google Firebase authentication and are also accessible of
 
 Users are able to share images (take a picture or choose from media library) once the user grants access to their local media library
 and camera. Location sharing is enabled by the user granting the app permission to read user location data.
- <br />
+
+**See the hosted project on an Andriod Emulator [here](https://snack.expo.io/@zeniagist/chatterbox). To run the online Andriod emulator 
+review instructions [here](#online-andriod-emulator-setup).**
 
 ![Chatterbox](assets/chatterbox.gif)
+
+## Online Andriod Emulator Setup
+
+Go to hosted project [here](https://snack.expo.io/@zeniagist/chatterbox) and select Andriod.
 
 ## Quick Start 🚀
 
