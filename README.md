@@ -20,9 +20,7 @@ Go to hosted project [here](https://snack.expo.io/@zeniagist/chatterbox).
 2. Change version to v41.0.0
 3. Select 'Tap to play'
 - If device preview is at capacity wait in the queue. 
-```diff
-- An account is not required to view and run the app
-```
+- ***An account is not required to view and run the app***
 
 ![Online Android Emulator Setup](online-android-emulator-setup.JPG)
 
