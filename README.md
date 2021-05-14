@@ -22,7 +22,7 @@ Go to hosted project [here](https://snack.expo.io/@zeniagist/chatterbox).
 - If device preview is at capacity wait in the queue. 
 - ***An account is not required to view and run the app***
 
-![Online Android Emulator Setup](online-android-emulator-setup.JPG)
+![Online Android Emulator Setup](assets/online-android-emulator-setup.JPG)
 
 ## Quick Start 🚀
 
