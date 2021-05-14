@@ -1,211 +1,259 @@
-import React from "react";
-import {
-  View,
-  ImageBackground,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { Icon } from "react-native-elements";
+import React from 'react';
+import { StyleSheet, View, Text, TextInput, Button, ImageBackground, Platform, KeyboardAvoidingView, Alert } from 'react-native';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default class Start extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: "",
-      bgcolor: "#090C08",
+      name: '',
+      bgColor: '#474056',
     };
   }
 
   render() {
-    const factoriseBgProps = (bgcolorinfunc) => {
-      return (
-        <TouchableOpacity
-          key={bgcolorinfunc}
-          style={[
-            { backgroundColor: bgcolorinfunc },
-            styles.defaultForColorCircles,
-            this.state.bgcolor === bgcolorinfunc && styles.colorCirclesSelected,
-          ]}
-          onPress={() => this.setState({ bgcolor: bgcolorinfunc })}
-        >
-          {/* This creates the inner circles of background selectors */}
-          <View
-            key={bgcolorinfunc}
-            style={[
-              { backgroundColor: bgcolorinfunc },
-              { zIndex: 1 },
-              styles.defaultForSmallerCircles,
-              this.state.bgcolor === bgcolorinfunc &&
-                styles.colorCirclesSelected,
-            ]}
-          ></View>
-        </TouchableOpacity>
-      );
-    };
+    // import image for Start background
+    const image = require("../assets/backgroundimage.png");
+    const { bgcolor } = this.state;
 
     return (
-      <View style={styles.container}>
-        <ImageBackground
-          source={require("../assets/backgroundimage.png")}
-          style={styles.image}
-        >
-          <View style={styles.box1}>
-            <Text style={styles.title}>Chatterbox</Text>
+      <ImageBackground source={image} style={styles.backgroundImage} >
+        <View style={styles.container} >
+
+          {/* app title */}
+          <View style={styles.appTitleContainer}>
+            <Text style={styles.appTitle}>Chatterbox</Text>
           </View>
-          <View style={styles.box2}>
-            <View
-              style={{
-                flex: 1,
-                width: "88%",
-                alignSelf: "center",
-                justifyContent: "space-evenly",
-              }}
-            >
-              <View
-                style={{
-                  flex: 0.2,
-                  flexDirection: "row",
-                  borderColor: "gray",
-                  borderWidth: 1,
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                }}
-              >
-                <Icon
-                  name="user"
-                  type="antdesign"
-                  color="gray"
-                  style={{ marginLeft: 15, marginRight: 10 }}
-                />
-                <TextInput
-                  style={{
-                    flex: 0.95,
-                    color: "#757083",
-                    opacity: 0.5,
-                    fontWeight: "300",
-                    fontSize: 16,
-                  }}
-                  onChangeText={(name) => this.setState({ name })}
-                  value={this.state.name}
-                  placeholder="Your Name"
-                />
+
+          <View style={styles.userContainer} >
+            {/* username input */}
+            <TextInput
+              style={styles.textInput}
+              onChangeText={(name) => this.setState({ name })}
+              value={this.state.name}
+              placeholder='Type name here'
+              accessible={true}
+              accessibilityLabel="Enter name"
+              accessibilityHint="Enter your name for the chat"
+              accessibilityRole="keyboardkey"
+            />
+
+            {/* choose background color */}
+            <View style={styles.colorContainer} >
+
+              <Text style={styles.colorTitle} >
+                Choose Background Color:
+              </Text>
+              {/* background color options */}
+              <View style={styles.colorOptions} >
+
+                <TouchableOpacity
+                  onPress={() => this.setState({ bgcolor: '#090C08' })}
+                  style={styles.colorOne}
+                  accessible={true}
+                  accessibilityLabel="Black background"
+                  accessibilityHint="Choose background color for the chat"
+                  accessibilityRole="button"
+                ></TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => this.setState({ bgcolor: '#474056' })}
+                  style={styles.colorTwo}
+                  accessible={true}
+                  accessibilityLabel="Dark purple background"
+                  accessibilityHint="Choose background color for the chat"
+                  accessibilityRole="button"
+                ></TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => this.setState({ bgcolor: '#8A95A5' })}
+                  style={styles.colorThree}
+                  accessible={true}
+                  accessibilityLabel="Light purple background"
+                  accessibilityHint="Choose background color for the chat"
+                  accessibilityRole="button"
+                ></TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => this.setState({ bgcolor: '#B9C6AE' })}
+                  style={styles.colorFour}
+                  accessible={true}
+                  accessibilityLabel="Light green background"
+                  accessibilityHint="Choose background color for the chat"
+                  accessibilityRole="button"
+                ></TouchableOpacity>
               </View>
-              <View style={{ flex: 0.33, justifyContent: "center" }}>
-                <Text
-                  style={{
-                    color: "#757083",
-                    opacity: 1,
-                    fontWeight: "300",
-                    fontSize: 16,
-                    paddingBottom: 15,
-                    textAlign: "center",
-                  }}
-                >
-                  Choose Background Color:
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-evenly",
-                  }}
-                >
-                  {["#090C08", "#474056", "#8A95A5", "#B9C6AE"].map(
-                    factoriseBgProps
-                  )}
-                </View>
-              </View>
-              <TouchableOpacity
-                style={{
-                  flex: 0.2,
-                  backgroundColor: "#757083",
-                  opacity: 1,
-                  color: "#ffffff",
-                  justifyContent: "center",
-                }}
-                onPress={() => {
+            </View>         
+
+            {/* navigate to chat screen */}
+            <TouchableOpacity
+              style={styles.chatButton}
+              onPress={() => {
+                  {/* name input blank */ }
                   if (this.state.name === "") {
-                    Alert.alert("Please input a name!");
-                  } else if (this.state.bgcolor === "") {
-                    Alert.alert("Please select a color!");
+                    Alert.alert("Please enter your name");
                   } else {
-                    this.props.navigation.navigate("Chat", {
-                      name: this.state.name,
-                      bgcolor: this.state.bgcolor,
-                    }); //pass name and background color as props to the Chat view
-                    this.setState({ name: "" }); // clear the state for name so the user has to input it.
+                    this.props.navigation.navigate("Chat",
+                      {
+                        name: this.state.name,
+                        bgcolor: this.state.bgcolor,
+                      }
+                    )
                   }
                 }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "700",
-                    fontSize: 16,
-                    color: "#ffffff",
-                    alignSelf: "center",
-                  }}
-                >
-                  Start Chatting
-                </Text>
-              </TouchableOpacity>
-            </View>
+              accessible={true}
+              accessibilityLabel="Chat button"
+              accessibilityHint="Start chatting"
+              accessibilityRole="button"
+            >
+              <Text style={styles.chatButtonText}>Start Chatting</Text>
+            </TouchableOpacity>
           </View>
-        </ImageBackground>
-        {Platform.OS === "android" ? (
-          <KeyboardAvoidingView behavior="height" />
-        ) : null}
-      </View>
-    );
+
+        </View>
+      </ImageBackground>
+    )
   }
 }
 
+//---------- Styles ----------//
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
-  },
-  image: {
-    flex: 1,
+    justifyContent: "center",
     width: "100%",
     height: "100%",
-    justifyContent: "space-evenly",
-  },
-  box1: {
-    flex: 0.33,
-    alignItems: "center",
-  },
-  box2: {
-    flex: 0.44,
-    backgroundColor: "#fff",
-    width: "88%",
-    alignSelf: "center",
+    resizeMode: "cover",
   },
 
-  title: {
+  container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 15,
+  },
+
+  appTitleContainer: {
+    width: '88%',
+    height: '56%'
+  },
+
+  appTitle: {
+    position: "relative",
+    textAlign: "center",
+    margin: 20,
+    marginRight: "auto",
+    marginLeft: "auto",
+    color: "#FFFFFF",
+    top: 100,
+    height: "44%",
     fontSize: 45,
     fontWeight: "600",
-    color: "#ffffff",
-    marginTop: 30,
   },
-  defaultForColorCircles: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    padding: 10,
+
+  userContainer: {
+    top: -30,
+    height: 'auto',
+    backgroundColor: "white",
+    padding: 'auto',
+    borderRadius: 5,
   },
-  colorCirclesSelected: {
-    borderWidth: 2,
-    borderColor: "#fff",
-    borderStyle: "solid",
-    transform: [{ scale: 1.5 }],
+
+  textInput: {
+    borderColor: 'gray',
+    color: '#757083',
+    borderWidth: 1,
+    fontSize: 16,
+    fontWeight: '300',
+    opacity: 50,
+    position: 'relative',
+    padding: 5,
+    margin: 20,
   },
-  defaultForSmallerCircles: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 50,
+
+  colorContainer: {
+    margin: 20
   },
+
+  colorTitle: {
+    fontSize: 16,
+    fontWeight: '300',
+    color: '#757083',
+    opacity: 100
+  },
+
+  colorOptions: {
+    flexDirection: 'row',
+    marginRight: 5,
+    position: 'relative'
+  },
+
+  colorOne: {
+    backgroundColor: '#090C08',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    margin: 10
+  },
+
+  colorTwo: {
+    backgroundColor: '#474056',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    margin: 10
+  },
+
+  colorThree: {
+    backgroundColor: '#8A95A5',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    margin: 10
+  },
+
+  colorFour: {
+    backgroundColor: '#B9C6AE',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    margin: 10
+  },
+
+  selectedColor: {
+    marginBottom: 10,
+    marginLeft: 20,
+    color: '#757083',
+    fontWeight: '300',
+  },
+
+  selectedColorOptions: {
+    backgroundColor: '#090C08',
+    width: 30,
+    height: 30,
+    borderRadius: 25,
+    margin: 10,
+  },
+
+  chatButton: {
+    width: "88%",
+    backgroundColor: "#757083",
+    margin: 20,
+    marginLeft: "auto",
+    marginRight: "auto",
+    fontSize: 16,
+    fontWeight: "600",
+    padding: 15,
+    borderRadius: 3,
+  },
+
+  chatButtonText: {
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+
 });
+
+{/*https://github.com/zeniagist/chatterbox/blob/4c9321e51f74c0c4762c211f5612cf0d307bc9dc/components/Start.js*/}
