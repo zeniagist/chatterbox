@@ -2,8 +2,8 @@
 
 Chatterbox is a chat app for mobile devices built with React Native and developed using Expo.
 
-The chat interface functionality is created with the Gifted Chat library. Chat conversations are stored locally with Google 
-Firestore Database and Google Firebase authentication and are also accessible offline.
+The chat interface functionality is created with the Gifted Chat library. Chat conversations are stored in Postgre SQL databas
+and are accessible offline.
 
 Users are able to share images (take a picture or choose from media library) once the user grants access to their local media library
 and camera. Location sharing is enabled by the user granting the app permission to read user location data.
