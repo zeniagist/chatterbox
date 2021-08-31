@@ -22,7 +22,7 @@ Go to hosted project [here](https://snack.expo.io/@zeniagist/chatterbox).
 - If device preview is at capacity wait in the queue. 
 - ***An account is not required to view and run the app***
 
-![Online Android Emulator Setup](assets/online-android-emulator-setup-1.jpg)
+<!-- ![Online Android Emulator Setup](assets/online-android-emulator-setup-1.jpg)
 
 ## Quick Start 🚀
 
@@ -30,7 +30,7 @@ Go to hosted project [here](https://snack.expo.io/@zeniagist/chatterbox).
 
 Check if you are running the latest version of [Node](https://nodejs.org/en/).
 
-Install [Expo](https://expo.io/) and create [your-Expo-account] (https://expo.io/signup)
+Install [Expo](https://expo.io/) and create [your-Expo-account] (https://expo.io/signup) -->
 
 ```sh
 $ npm install expo-cli --global
